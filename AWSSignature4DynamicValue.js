@@ -154,6 +154,9 @@ d[e>>>5]|=128<<24-e%32;d[(e+64>>>9<<4)+14]=h.floor(b/4294967296);d[(e+64>>>9<<4)
 this._hasher;f=g.finalize(f);g.reset();return g.finalize(this._oKey.clone().concat(f))}})})();
 
 function getSignatureKey(key, dateStamp, regionName, serviceName) {
+
+    // Signatures must use CryptoJS because the built in HMACDynamicValue won't
+    // input or output raw byte arrays which is needed for the AWS signature.
     var kDate= CryptoJS.HmacSHA256(dateStamp, "AWS4" + key)
     var kRegion= CryptoJS.HmacSHA256(regionName, kDate)
     var kService=CryptoJS.HmacSHA256(serviceName, kRegion)
@@ -234,6 +237,7 @@ var AWSSignature4DynamicValue = function() {
 
         var signature = CryptoJS.HmacSHA256(stringToSign, kSigning)
 
+        // Step 4
         var auth = 'AWS4-HMAC-SHA256 Credential=' + this.key + '/' + scope + ', SignedHeaders=' + signedHeaders + ', Signature=' + signature
 
         if (daytimeHeader === null) {
