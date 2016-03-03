@@ -1,16 +1,6 @@
-identifier=com.luckymarmot.PawExtensions.AWSECommerceServiceDynamicValue
+identifier=com.shigeoka.PawExtensions.AWSSignature4DynamicValue
 extensions_dir=$(HOME)/Library/Containers/com.luckymarmot.Paw/Data/Library/Application Support/com.luckymarmot.Paw/Extensions/
 
-build:
-	npm run build
-	cp README.md LICENSE ./build/$(identifier)/
-
-clean:
-	rm -Rf ./build/
-
-install: clean build
+install:
 	mkdir -p "$(extensions_dir)$(identifier)/"
-	cp -r ./build/$(identifier)/* "$(extensions_dir)$(identifier)/"
-
-archive: build
-	cd ./build/; zip -r AWSECommerceServiceDynamicValue.zip "$(identifier)/"
+	cp *.js "$(extensions_dir)$(identifier)/"
