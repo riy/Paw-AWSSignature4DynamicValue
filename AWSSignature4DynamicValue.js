@@ -254,8 +254,8 @@ AWSSignature4DynamicValue.identifier = 'com.shigeoka.PawExtensions.AWSSignature4
 AWSSignature4DynamicValue.title = 'AWS Signature 4 Auth'
 AWSSignature4DynamicValue.help = 'https://github.com/badslug/Paw-AWSSignature4DynamicValue'
 AWSSignature4DynamicValue.inputs = [
-      DynamicValueInput('key', 'AWS Access Key', 'String'),
-      DynamicValueInput('secret', 'AWS Secret Key', 'String'),
+      DynamicValueInput('key', 'AWS Access Key', 'SecureValue'),
+      DynamicValueInput('secret', 'AWS Secret Key', 'SecureValue'),
       DynamicValueInput('region', 'AWS Region (us-east-1)', 'String'),
       DynamicValueInput('service', 'AWS Service (execute-api)', 'String'),
   ]
