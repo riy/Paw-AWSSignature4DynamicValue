@@ -49,16 +49,6 @@ function getParametersString(request, search) {
         }
     })
 
-    /* or from the POST body (when Content-Type is
-     * application/x-www-form-urlencoded). */
-    var urlEncodedBody = request.urlEncodedBody
-    if (urlEncodedBody) {
-      for (var key in urlEncodedBody) {
-        var value = urlEncodedBody[key]
-        params.push([key, value])
-      }
-    }
-
     /* Sort the UTF-8 query string components by parameter name with natural
      * byte ordering. */
     params.sort(function(a, b) {
