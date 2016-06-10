@@ -1,6 +1,6 @@
 
 function getLocation(href) {
-    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(?:\?([^#]*|)(#.*|))?$/);
     return match && {
         protocol: match[1],
         host: match[2],
@@ -38,12 +38,16 @@ function getParametersString(request, search) {
     /* Create the canonicalized query string that you need later in this
      * procedure:
      */
+     if (search === null || typeof search === "undefined") {
+        return ""
+     } 
+
     var params = []
 
     /* The parameters can come from the GET URI ... */
     var query = search.split('&')
-    query.forEach(function(params) {
-        var parts = params.split('=',2)
+    query.forEach(function(param) {
+        var parts = param.split('=',2)
         if (parts.length === 2 && parts[0] !== 'Signature') {
             params.push(parts)
         }
