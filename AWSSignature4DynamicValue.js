@@ -196,14 +196,28 @@ var AWSSignature4DynamicValue = function() {
             daytime = day + 'T' + amzTime(now)
         }
         var bodyHash = hash256(request.body || '')
-
-        // Step 1
+        
+        // Search for other signed headers to include. We will assume any headers that begin with X-Amz-<*> will be included
         var signedHeaders = 'host;x-amz-date'
+        var headers = '' // The actual headers to sign
+        var names = request.getHeaderNames()
+        if (names) {
+            names.forEach(function(name) {
+                var lower = name.toLowerCase()
+                if (lower !== 'x-amz-date' && lower.startsWith('x-amz-') {
+                    signedHeaders += ';'+lower
+                    headers += lower + ':' + request.getHeaderByName(name, false) + '\n'
+                }
+            })
+        }
+        
+        // Step 1
         var canonical = request.method + '\n' +
             uri.pathname + '\n' +
             getParametersString(request, uri.search) + '\n' +
             'host:' + uri.hostname.toLowerCase() + '\n' +
             'x-amz-date:' + daytime + '\n' +
+            headers +
             '\n' +
             signedHeaders + '\n' +
             bodyHash
