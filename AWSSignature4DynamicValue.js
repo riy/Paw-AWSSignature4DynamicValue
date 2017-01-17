@@ -71,9 +71,12 @@ function getParametersString(request, search) {
      * equals sign ( = ) (ASCII character 61), even if the parameter value is
      * empty.
      * Separate the name-value pairs with an ampersand ( & ) (ASCII code 38).
+     *
+     * NOTE: Paw already URL encodes parameters before passing them to this 
+     * extension.
      */
     var stringParams = params.map(function(pair) {
-      return encodeURIComponent(pair[0]) + '=' + encodeURIComponent(pair[1])
+      return pair[0] + '=' + pair[1]
     })
     return stringParams.join('&')
   }
