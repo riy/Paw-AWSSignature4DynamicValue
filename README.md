@@ -9,7 +9,7 @@ protected using IAM.
 
 TBD
 
-To support AWS Signature 3 authentication please follow these steps:
+To support AWS Signature 4 authentication please follow these steps:
 
 * Install this extension. For now, you should install by using the Makefile
     (see Development section below).
