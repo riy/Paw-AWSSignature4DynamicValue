@@ -211,7 +211,7 @@ var AWSSignature4DynamicValue = function() {
         if (names) {
             names.forEach(function(name) {
                 var lower = name.toLowerCase()
-                if (lower !== 'x-amz-date' && lower.startsWith('x-amz-') {
+                if (lower !== 'x-amz-date' && lower.startsWith('x-amz-')) {
                     signedHeaders += ';'+lower
                     headers += lower + ':' + request.getHeaderByName(name, false) + '\n'
                 }
