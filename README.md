@@ -40,6 +40,8 @@ Paw.
 [start]: http://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started.html
 [protect]: http://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-method-settings-callers-console.html
 
+> Note: if you are a user of STS temporary credentials, you will also need a header `X-Amz-Security-Token` with your `session token`.
+
 # Issues
 
 * Freeze dynamic values to obtain X-Amz-Date as generated and sent to client
