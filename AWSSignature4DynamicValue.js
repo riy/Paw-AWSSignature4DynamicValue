@@ -1,6 +1,6 @@
 
 function getLocation(href) {
-    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(?:\?([^#]*|)(#.*|))?$/);
     return match && {
         protocol: match[1],
         host: match[2],
@@ -38,12 +38,16 @@ function getParametersString(request, search) {
     /* Create the canonicalized query string that you need later in this
      * procedure:
      */
+     if (search === null || typeof search === "undefined") {
+        return ""
+     }
+
     var params = []
 
     /* The parameters can come from the GET URI ... */
     var query = search.split('&')
-    query.forEach(function(params) {
-        var parts = params.split('=',2)
+    query.forEach(function(param) {
+        var parts = param.split('=',2)
         if (parts.length === 2 && parts[0] !== 'Signature') {
             params.push(parts)
         }
@@ -67,9 +71,12 @@ function getParametersString(request, search) {
      * equals sign ( = ) (ASCII character 61), even if the parameter value is
      * empty.
      * Separate the name-value pairs with an ampersand ( & ) (ASCII code 38).
+     *
+     * NOTE: Paw already URL encodes parameters before passing them to this
+     * extension.
      */
     var stringParams = params.map(function(pair) {
-      return encodeURIComponent(pair[0]) + '=' + encodeURIComponent(pair[1])
+      return pair[0] + '=' + pair[1]
     })
     return stringParams.join('&')
   }
