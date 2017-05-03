@@ -206,9 +206,10 @@ var AWSSignature4DynamicValue = function() {
         
         // Search for other signed headers to include. We will assume any headers that begin with X-Amz-<*> will be included
         var signedHeaders = 'host;x-amz-date'
-        var headers = request.getHeadersArray()
-        if (headers) {
-          headers.forEach(function(header) {
+        var headers = '' // The actual headers to sign
+        var headersArray = request.getHeadersArray()
+        if (headersArray) {
+          headersArray.forEach(function(header) {
             var lower = header.name.getEvaluatedString().toLowerCase()
             if (lower !== 'x-amz-date' && lower.startsWith('x-amz-')) {
               signedHeaders += ';'+lower
