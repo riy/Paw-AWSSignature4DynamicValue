@@ -205,28 +205,38 @@ var AWSSignature4DynamicValue = function() {
         var bodyHash = hash256(request.body || '')
         
         // Search for other signed headers to include. We will assume any headers that begin with X-Amz-<*> will be included
-        var signedHeaders = 'host;x-amz-date'
-        var headers = '' // The actual headers to sign
+        var headers = {} // The actual headers to sign
         var headersArray = request.getHeadersArray()
         if (headersArray) {
           headersArray.forEach(function(header) {
             var lower = header.name.getEvaluatedString().toLowerCase()
-            if (lower !== 'x-amz-date' && lower.startsWith('x-amz-')) {
-              signedHeaders += ';'+lower
-              headers += lower + ':' + header.value.getEvaluatedString() + '\n'
+            if (lower.startsWith('x-amz-')) {
+              headers[lower] = header.value.getEvaluatedString();
             }
           })
+        }
+
+        headers['host'] = uri.hostname.toLowerCase();
+
+        if (!headers['x-amz-date']) {
+          headers['x-amz-date'] = daytime;
+        }
+
+        var signedHeaders    = []
+        var canonicalHeaders = []
+
+        for (var h of Object.keys(headers).sort()) {
+          signedHeaders.push(h);
+          canonicalHeaders.push(h + ':' + headers[h]);
         }
         
         // Step 1
         var canonical = request.method + '\n' +
             uri.pathname + '\n' +
             getParametersString(request, uri.search) + '\n' +
-            'host:' + uri.hostname.toLowerCase() + '\n' +
-            'x-amz-date:' + daytime + '\n' +
-            headers +
+            canonicalHeaders.join('\n') + '\n' +
             '\n' +
-            signedHeaders + '\n' +
+            signedHeaders.join(';') + '\n' +
             bodyHash
 
         var canonicalHash = hash256(canonical)
@@ -249,7 +259,7 @@ var AWSSignature4DynamicValue = function() {
         var signature = CryptoJS.HmacSHA256(stringToSign, kSigning)
 
         // Step 4
-        var auth = 'AWS4-HMAC-SHA256 Credential=' + this.key + '/' + scope + ', SignedHeaders=' + signedHeaders + ', Signature=' + signature
+        var auth = 'AWS4-HMAC-SHA256 Credential=' + this.key + '/' + scope + ', SignedHeaders=' + signedHeaders.join(';') + ', Signature=' + signature
 
         if (daytimeHeader === null) {
             // Add the missing header - this doesn't seem to actually "stick"
