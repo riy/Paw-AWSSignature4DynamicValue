@@ -232,7 +232,7 @@ var AWSSignature4DynamicValue = function() {
         
         // Step 1
         var canonical = request.method + '\n' +
-            uri.pathname + '\n' +
+            uri.pathname.replace(',', '%2C') + '\n' +
             getParametersString(request, uri.search) + '\n' +
             canonicalHeaders.join('\n') + '\n' +
             '\n' +
