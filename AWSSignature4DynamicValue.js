@@ -212,7 +212,7 @@ var AWSSignature4DynamicValue = function() {
           })
         }
 
-        headers['host'] = uri.hostname.toLowerCase();
+        headers['host'] = uri.host.toLowerCase();
 
         if (!headers['x-amz-date']) {
           headers['x-amz-date'] = daytime;
