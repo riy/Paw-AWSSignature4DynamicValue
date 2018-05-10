@@ -183,10 +183,6 @@ var AWSSignature4DynamicValue = function() {
     this.evaluate = function(context) {
         var request = context.getCurrentRequest()
         var uri = getLocation(request.url)
-        var opts = {
-            path: uri.pathname,
-            host: uri.hostname,
-        }
         var region = this.region || 'us-east-1'
         var service = this.service || 'execute-api'
 
