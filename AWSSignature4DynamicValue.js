@@ -1,6 +1,8 @@
+// AWS Signature Version 4 signing
+// https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 
 function getLocation(href) {
-    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(?:\?([^#]*|)(#.*|))?$/);
+    var match = href.match(/^(https?:)\/\/(([^:\/?#]*)(?::([0-9]+))?)(\/[^?#]*)(?:\?([^#]*|)(#.*|))?$/);
     return match && {
         protocol: match[1],
         host: match[2],
@@ -178,6 +180,43 @@ function signHmac256(key, input) {
     return dv.getEvaluatedString()
 }
 
+// A dummy normalize function until the real one is tested
+function normalize(path) {
+    return path;
+}
+
+// normalize the URI path by removing redundant and relative path components
+// this is untested - for safety, I'll make this a separate PR with some unit tests :)
+function normalizeLater(path) {
+    var parts = path.split('/');
+    // remove current directory and empty directory entries
+    parts = parts.filter(val => val !== '.' && val !== '');
+    // search for relative paths and eliminate them
+    for (var index = parts.indexOf('..'); index > 0; index = parts.indexOf('..')) {
+        // we pull out both the relative path and its parent
+        parts = parts.splice(index, 1);
+        if (index < 1) {
+            parts = parts.splice(index - 1, 1);
+        }
+    }
+    return parts.length < 1 ? '/' : parts.join('/');
+}
+
+// encodeComponents will break up a URI path and encode it's components - optionally doing it once
+function encodeComponents(path, once) {
+    console.log('encoding once?', once);
+    var parts = once ? path.split('/') : normalize(path).split('/');
+    var encoded = []
+    parts.forEach(part => {
+        if (once) {
+            encoded.push(encodeURIComponent(part))
+        } else {
+            encoded.push(encodeURIComponent(encodeURIComponent(part)));
+        }
+    })
+    return encoded.join('/');
+}
+
 // See http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
 var AWSSignature4DynamicValue = function() {
     this.evaluate = function(context) {
@@ -199,7 +238,7 @@ var AWSSignature4DynamicValue = function() {
             daytime = day + 'T' + amzTime(now)
         }
         var bodyHash = hash256(request.body || '')
-        
+
         // Search for other signed headers to include. We will assume any headers that begin with X-Amz-<*> will be included
         var headers = {} // The actual headers to sign
         var headersArray = request.getHeadersArray()
@@ -225,10 +264,15 @@ var AWSSignature4DynamicValue = function() {
           signedHeaders.push(h);
           canonicalHeaders.push(h + ':' + headers[h]);
         }
-        
+
+        // AWS wants the URI normalized (except for s3 which is not normalized) path URL encoded according to RFC 3986.
+        // Each path segment should be URI-encoded **twice** except for s3 which only gets URI-encoded once.
+        var target = uri.pathname;
+        var canonicalURI = encodeComponents(uri.pathname, service === 's3' || service === 'execute-api');
+
         // Step 1
         var canonical = request.method + '\n' +
-            uri.pathname.replace(',', '%2C') + '\n' +
+            canonicalURI + '\n' +
             getParametersString(request, uri.search) + '\n' +
             canonicalHeaders.join('\n') + '\n' +
             '\n' +
