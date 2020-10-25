@@ -202,6 +202,21 @@ function normalizeLater(path) {
     return parts.length < 1 ? '/' : parts.join('/');
 }
 
+// encodeComponents will break up a URI path and encode it's components - optionally doing it once
+function encodeComponents(path, once) {
+    console.log('encoding once?', once);
+    var parts = once ? path.split('/') : normalize(path).split('/');
+    var encoded = []
+    parts.forEach(part => {
+        if (once) {
+            encoded.push(encodeURIComponent(part))
+        } else {
+            encoded.push(encodeURIComponent(encodeURIComponent(part)));
+        }
+    })
+    return encoded.join('/');
+}
+
 // See http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
 var AWSSignature4DynamicValue = function() {
     this.evaluate = function(context) {
@@ -253,9 +268,7 @@ var AWSSignature4DynamicValue = function() {
         // AWS wants the URI normalized (except for s3 which is not normalized) path URL encoded according to RFC 3986.
         // Each path segment should be URI-encoded **twice** except for s3 which only gets URI-encoded once.
         var target = uri.pathname;
-        var canonicalURI = service === 's3' ?
-            encodeURI(target):
-            encodeURI(encodeURI(normalize(target)));
+        var canonicalURI = encodeComponents(uri.pathname, service === 's3' || service === 'execute-api');
 
         // Step 1
         var canonical = request.method + '\n' +
